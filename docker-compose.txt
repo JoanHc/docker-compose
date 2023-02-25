@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+    db:
+        image: mariadb:10.3.9
+        restart: always
+        volumes:
+            - data:/var/lib/mysql
+            
+        environment:
+            - MYSQL_ROOT_PASSWORD=secret
+            - MYSQL_DATABASE=wordpress
+            - MYSQL_USER=manager
+            - MYSQL_ALLOW_EMPTY_PASSWORD= 'no'
+            - MYSQL_PASSWORD=secret
+    web:
+        image: wordpress:4.9.8
+        restart: always
+        depends_on:
+            - db
+        volumes:
+            - ./target:/var/www/html
+        environment:
+            - WORDPRESS_DB_USER=manager
+            - WORDPRESS_DB_PASSWORD=secret
+            - WORDPRESS_DB_HOST=db
+            - WORDPRESS_DB_NAME=wordpress
+        ports:
+            - 8080:80
+        links:
+            - db:db
+
+    phpmyadmin:
+        image: phpmyadmin:5.2.1
+        restart: always
+        depends_on:
+            - db
+        environment:
+            - PMA_HOST=db
+            - PMA_USER=manager
+            - PMA_PASSWORD=secret
+        ports:
+            - 12000:80
+        links:
+            - db:db
+volumes:
+    data: {}
+
